@@ -11,6 +11,7 @@
 #pragma config LVP    = OFF
 
 unsigned char h = 12, m = 0;
+signed char menu = 1;
 
 void escreve2dig(unsigned char v);
 
@@ -18,7 +19,8 @@ void main() {
     char atraso;
 
     // --- Configuracao de I/O e A/D ---
-    ADCON1 = 0x0F;              // todos os pinos como digitais (ajustar
+   ADCON1 = 0x0F;
+   CMCON = 0x07;
                                  // depois ao habilitar os canais do LM35
                                  // e do potenciometro)
     TRISBbits.TRISB0 = 1;       // INT0
@@ -41,17 +43,19 @@ void main() {
     // Período do PWM
     // Fpwm = Fosc / (4 * (PR2+1) * prescaler)
     // PR2 = 249 -> aproximadamente 5kHz
-    PR2 = 249;
+    PR2 = 255;
 
 
     // CCP1 em modo PWM
     CCP1CON = 0b00001100;
-
-
-    // Duty cycle inicial 0%
-    CCPR1L = 0;
+    
+    // Duty inicial 75%
+    CCPR1L = 191;
     CCP1CONbits.DC1B0 = 0;
     CCP1CONbits.DC1B1 = 0;
+
+
+   
 
     // --- Configuracao de prioridade e interrupcoes globais ---
     RCONbits.IPEN = 1;          // habilita niveis de prioridade
@@ -79,11 +83,21 @@ void main() {
     WriteCmdXLCD(0x01);
     __delay_ms(16);
     WriteCmdXLCD(0x80);
+    
+    /*
+     
+     
     putrsXLCD("Menu: ");
     escreve2dig(h);
     putcXLCD(':');
     escreve2dig(m);
-
+ 
+     
+     */
+    
+    
+    putrsXLCD("TESTE LCD");
+    
     while (1) {
         CLRWDT();
         PORTAbits.RA5 = 0;
@@ -100,24 +114,6 @@ void main() {
             case 3:
                 putrsXLCD("Liga Ventilador ");
                 break;
-        }
-
-        // Consome a confirmacao feita via INT0 dentro da ISR.
-        // Aqui e o lugar certo para, no futuro, chamar as funcoes
-        // que de fato iniciam cada modo (malha aberta / fechada / ventilador).
-        if (menu_confirmado != 0){
-            switch (menu_confirmado){
-                case 1:
-                    // TODO: iniciar controle em malha aberta (PWM fixo 75%)
-                    break;
-                case 2:
-                    // TODO: iniciar controle em malha fechada (PI)
-                    break;
-                case 3:
-                    // TODO: iniciar acionamento do ventilador (40% / 5s)
-                    break;
-            }
-            menu_confirmado = 0;
         }
 
         for (atraso = 0; atraso < 50; atraso++)

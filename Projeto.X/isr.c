@@ -5,7 +5,7 @@
 // --------------------------------------------------------------------
 
 // Rotina de Servi�o de Interrup��o (ISR) de alta prioridade
-void interrupt ISR_Alta_Prioridade(void){
+void __interrupt(high_priority) ISR_Alta_Prioridade(void){
 
     PIR1bits.CCP1IF = 0;	
     LATCbits.LATC2 = !LATCbits.LATC2;
@@ -33,7 +33,7 @@ void interrupt ISR_Alta_Prioridade(void){
 // Interrup��o de baixa prioridade 
 // --------------------------------------------------------------------
 // Rotina de Servi�o de Interrup��o (ISR) de baixa prioridade
-void interrupt low_priority ISR_Baixa_Prioridade(void){
+void __interrupt(low_priority) ISR_Baixa_Prioridade(void){
     extern signed char menu;
         // Ocorr?ncia de INT1
         if (INTCON3bits.INT1IF){
